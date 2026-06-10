@@ -3,7 +3,7 @@ let filteredScholarships = [];
 
 async function loadCSV() {
   const SHEET_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxek53OQeO0xbFzldCCahGQQZMEdQtZtnB0hbrAmhB791iTNrGn_XTv7vEgsBdsa9ros7Pm6fSv8Sh/pub?output=csv";
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTrk5-E8o0U3sL-_rDtquya-u2Yb08Kb1Dsoswxgg2Unzrdf_xHKADQjUmvRZbfttIQhtzohHQor5yG/pub?output=csv";
 
   const response = await fetch(SHEET_URL + "&v=" + Date.now());
   const text = await response.text();
@@ -18,33 +18,84 @@ async function loadCSV() {
   renderScholarships();
 }
 
+function parseDeadline(rawDeadline) {
+  if (!rawDeadline) return null;
+
+  const text = rawDeadline.trim();
+
+  if (
+    text.toLowerCase().includes("open") ||
+    text.toLowerCase().includes("rolling") ||
+    text.toLowerCase().includes("varies") ||
+    text.toLowerCase().includes("quarterly")
+  ) {
+    return null;
+  }
+
+  const currentYear = new Date().getFullYear();
+
+  let cleaned = text
+    .replace(/Sept/i, "Sep")
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .trim();
+
+  const date = new Date(cleaned);
+  if (!isNaN(date)) return date;
+
+  const withYear = `${cleaned} ${currentYear}`;
+  const dateWithYear = new Date(withYear);
+
+  if (!isNaN(dateWithYear)) return dateWithYear;
+
+  return null;
+}
+
 function applyFilters() {
   const search = document.getElementById("searchInput").value.toLowerCase();
-  const status = document.getElementById("statusFilter").value;
+  const demographic = document.getElementById("demographicFilter").value.toLowerCase();
+  const criteria = document.getElementById("criteriaFilter").value.toLowerCase();
   const fromDate = document.getElementById("fromDate").value;
   const toDate = document.getElementById("toDate").value;
 
   filteredScholarships = scholarships.filter(item => {
+    const name = item["Scholarship Name"] || "";
+    const criteriaText = item.Criteria || "";
+    const demographicText = item.Demographic || "";
+    const amount = item.Amount || "";
+
     const searchableText = `
-      ${item.ScholarshipTitle || ""}
-      ${item.Provider || ""}
-      ${item.Tags || ""}
-      ${item.EligibilityCriteria || ""}
+      ${name}
+      ${criteriaText}
+      ${demographicText}
+      ${amount}
     `.toLowerCase();
 
     const matchesSearch = !search || searchableText.includes(search);
-    const matchesStatus = !status || (item.Status || "").includes(status);
+
+    const matchesDemographic =
+      !demographic || demographicText.toLowerCase().includes(demographic);
+
+    const matchesCriteria =
+      !criteria || criteriaText.toLowerCase().includes(criteria);
 
     let matchesDate = true;
-    if (fromDate || toDate) {
-      const deadline = item.ApplicationDeadline ? new Date(item.ApplicationDeadline) : null;
-      if (!deadline || isNaN(deadline)) return false;
 
-      if (fromDate && deadline < new Date(fromDate)) matchesDate = false;
-      if (toDate && deadline > new Date(toDate)) matchesDate = false;
+    if (fromDate || toDate) {
+      const deadline = parseDeadline(item.Deadline);
+
+      if (!deadline) return false;
+
+      if (fromDate && deadline < new Date(fromDate)) {
+        matchesDate = false;
+      }
+
+      if (toDate && deadline > new Date(toDate)) {
+        matchesDate = false;
+      }
     }
 
-    return matchesSearch && matchesStatus && matchesDate;
+    return matchesSearch && matchesDemographic && matchesCriteria && matchesDate;
   });
 
   renderScholarships();
@@ -61,14 +112,16 @@ function renderScholarships() {
     const card = document.createElement("div");
     card.className = "card";
 
+    const title = item["Scholarship Name"] || "Untitled Scholarship";
+    const link = item["Scholarship Link"] || "#";
+
     card.innerHTML = `
-      <h2>${item.ScholarshipTitle || "Untitled Scholarship"}</h2>
-      <p class="meta"><strong>Provider:</strong> ${item.Provider || "N/A"}</p>
-      <p class="meta"><strong>Award:</strong> ${item.AwardAmount || "N/A"}</p>
-      <p class="meta"><strong>Deadline:</strong> ${item.ApplicationDeadline || "N/A"}</p>
-      <p class="meta"><strong>Status:</strong> ${item.Status || "N/A"}</p>
-      <p class="tags"><strong>Tags:</strong> ${item.Tags || "N/A"}</p>
-      <a class="apply-btn" href="${item.ApplicationLink}" target="_blank">Apply Now</a>
+      <h2>${title}</h2>
+      <p class="meta"><strong>Amount:</strong> ${item.Amount || "N/A"}</p>
+      <p class="meta"><strong>Deadline:</strong> ${item.Deadline || "N/A"}</p>
+      <p class="meta"><strong>Criteria:</strong> ${item.Criteria || "N/A"}</p>
+      <p class="tags"><strong>Demographic:</strong> ${item.Demographic || "N/A"}</p>
+      <a class="apply-btn" href="${link}" target="_blank">View Scholarship</a>
     `;
 
     list.appendChild(card);
@@ -77,16 +130,12 @@ function renderScholarships() {
 
 function downloadResults() {
   const headers = [
-    "ScholarshipTitle",
-    "Provider",
-    "AwardAmount",
-    "ApplicationWindow",
-    "ApplicationDeadline",
-    "ApplicationLink",
-    "Tags",
-    "Status",
-    "LastVerified",
-    "EligibilityCriteria"
+    "Scholarship Name",
+    "Scholarship Link",
+    "Criteria",
+    "Amount",
+    "Deadline",
+    "Demographic"
   ];
 
   const csvRows = [headers.join(",")];
@@ -96,6 +145,7 @@ function downloadResults() {
       const value = item[header] || "";
       return `"${value.replace(/"/g, '""')}"`;
     });
+
     csvRows.push(row.join(","));
   });
 
@@ -111,15 +161,18 @@ function downloadResults() {
 }
 
 document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("statusFilter").addEventListener("change", applyFilters);
+document.getElementById("demographicFilter").addEventListener("change", applyFilters);
+document.getElementById("criteriaFilter").addEventListener("change", applyFilters);
 document.getElementById("fromDate").addEventListener("change", applyFilters);
 document.getElementById("toDate").addEventListener("change", applyFilters);
 
 document.getElementById("clearBtn").addEventListener("click", () => {
   document.getElementById("searchInput").value = "";
-  document.getElementById("statusFilter").value = "";
+  document.getElementById("demographicFilter").value = "";
+  document.getElementById("criteriaFilter").value = "";
   document.getElementById("fromDate").value = "";
   document.getElementById("toDate").value = "";
+
   filteredScholarships = scholarships;
   renderScholarships();
 });
