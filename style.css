@@ -8,26 +8,64 @@ body {
 header {
   background: #a52237;
   color: white;
-  padding: 24px;
+  padding: 28px 20px;
   text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+}
+
+header p {
+  margin: 0;
+  font-size: 16px;
 }
 
 .filters {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: end;
   padding: 20px;
   background: white;
   border-bottom: 1px solid #ddd;
 }
 
-input, select, button {
+input,
+select,
+button {
   padding: 10px;
   font-size: 14px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+}
+
+#searchInput {
+  min-width: 280px;
+  flex: 1;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-group label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
 }
 
 button {
   cursor: pointer;
+  background: #a52237;
+  color: white;
+  border: none;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 #resultCount {
@@ -46,6 +84,7 @@ button {
   padding: 18px;
   border-radius: 10px;
   border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .card h2 {
@@ -54,11 +93,11 @@ button {
 }
 
 .meta {
-  margin: 6px 0;
+  margin: 7px 0;
 }
 
 .tags {
-  font-size: 13px;
+  font-size: 14px;
   color: #555;
 }
 
@@ -70,4 +109,19 @@ button {
   padding: 10px 14px;
   text-decoration: none;
   border-radius: 6px;
+}
+
+.apply-btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 700px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #searchInput {
+    min-width: unset;
+  }
 }
