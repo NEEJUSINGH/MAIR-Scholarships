@@ -3,32 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scholarship Finder</title>
+  <title>Scholarship Dashboard</title>
   <link rel="stylesheet" href="style.css?v=1" />
 </head>
 <body>
   <header>
-    <h1>Military Student Scholarships</h1>
-    <p>Search and filter external scholarship opportunities.</p>
+    <h1>Scholarship Dashboard</h1>
+    <p>Search and filter scholarship opportunities by criteria, demographic, and deadline.</p>
   </header>
 
   <section class="filters">
-    <input id="searchInput" type="text" placeholder="Search by any keyword" />
+    <input id="searchInput" type="text" placeholder="Search scholarship, criteria, demographic..." />
 
-    <select id="statusFilter">
-      <option value="">All Statuses</option>
-      <option value="Open">Open</option>
-      <option value="Closed">Closed</option>
-      <option value="Rolling">Rolling</option>
-      <option value="Waiting for dates">Waiting for dates</option>
+    <select id="demographicFilter">
+      <option value="">All Demographics</option>
+      <option value="African American">African American</option>
+      <option value="Asian">Asian</option>
+      <option value="Black">Black</option>
+      <option value="BIPOC">BIPOC</option>
+      <option value="First Generation">First Generation</option>
+      <option value="Hispanic">Hispanic</option>
+      <option value="Latinx">Latinx</option>
+      <option value="LGBTQ">LGBTQ</option>
+      <option value="Native American">Native American</option>
+      <option value="Students of Color">Students of Color</option>
+      <option value="Veteran">Veteran</option>
+      <option value="Women">Women</option>
+      <option value="All students">All students</option>
     </select>
 
-  <div class="date-filter">
-  <span>Deadline:</span>
-  <input id="fromDate" type="date" />
-       <span>to</span>
-  <input id="toDate" type="date" />
-</div>
+    <select id="criteriaFilter">
+      <option value="">All Criteria</option>
+      <option value="Ambition">Ambition</option>
+      <option value="Need">Need</option>
+      <option value="Undergraduate">Undergraduate</option>
+      <option value="Graduate">Graduate</option>
+      <option value="STEM">STEM</option>
+      <option value="Nursing">Nursing</option>
+      <option value="U.S. Citizen">U.S. Citizen</option>
+      <option value="DACA">DACA</option>
+      <option value="International">International</option>
+      <option value="First Generation">First Generation</option>
+      <option value="GPA">GPA</option>
+    </select>
+
+    <div class="date-group">
+      <label for="fromDate">Deadline From</label>
+      <input id="fromDate" type="date" />
+    </div>
+
+    <div class="date-group">
+      <label for="toDate">Deadline To</label>
+      <input id="toDate" type="date" />
+    </div>
 
     <button id="clearBtn">Clear Filters</button>
     <button id="downloadBtn">Download Results</button>
@@ -39,6 +66,6 @@
   <main id="scholarshipList"></main>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="script.js?v=2"></script>
+  <script src="script.js?v=1"></script>
 </body>
 </html>
